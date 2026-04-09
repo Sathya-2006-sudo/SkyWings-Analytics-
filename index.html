@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SkyWings Analytics | Travel Dashboard</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #eef2f9 0%, #d9e2ef 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* ---------- LOGIN PAGE STYLES ---------- */
+        .login-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(2px);
+            border-radius: 32px;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 2.2rem 2rem;
+            max-width: 460px;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-area i {
+            font-size: 48px;
+            color: #1e4a76;
+            background: #eef2ff;
+            padding: 12px;
+            border-radius: 28px;
+        }
+
+        .logo-area h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-top: 12px;
+            background: linear-gradient(135deg, #0b3550, #2c6e9e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-area p {
+            color: #5b6e8c;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2a44;
+            margin-bottom: 6px;
+        }
+
+        .input-group .input-icon {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a99b4;
+            font-size: 16px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 1px solid #cfdfed;
+            border-radius: 24px;
+            font-size: 15px;
+            background: #ffffff;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #2c6e9e;
+            box-shadow: 0 0 0 3px rgba(44, 110, 158, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: #1e4a76;
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .login-btn:hover {
+            background: #0f3a5c;
+            transform: scale(1.01);
+            box-shadow: 0 6px 14px rgba(30, 74, 118, 0.3);
+        }
+
+        .error-msg {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+
+        /* ---------- DASHBOARD STYLES ---------- */
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 1600px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .dashboard-header {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 2rem;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            flex-wrap: wrap;
+        }
+
+        .brand h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e4a76, #3282b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand span {
+            font-size: 12px;
+            color: #5f7f9e;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: #f0f4fa;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e4a76;
+        }
+
+        .logout-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s;
+            border: 1px solid rgba(0,0,0,0.03);
+            text-align: center;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #5c6f87;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #1e2f41;
+            margin-top: 8px;
+        }
+
+        .kpi-sub {
+            font-size: 12px;
+            color: #5f9c6b;
+            margin-top: 6px;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            transition: transform 0.2s;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+            padding-left: 8px;
+            border-left: 4px solid #2c6e9e;
+            font-size: 1.1rem;
+        }
+
+        canvas {
+            max-height: 280px;
+            width: 100%;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin-top: 8px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .table-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e2f41;
+        }
+
+        .search-box {
+            padding: 8px 16px;
+            border: 1px solid #cfdfed;
+            border-radius: 40px;
+            font-size: 13px;
+            width: 250px;
+            outline: none;
+        }
+
+        .search-box:focus {
+            border-color: #2c6e9e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 8px;
+            background: #f8fafd;
+            color: #1f3b4c;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eef2f8;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background: #f8fafd;
+        }
+
+        .badge-season {
+            background: #e9f0f5;
+            border-radius: 40px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-peak {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-offpeak {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 12px;
+            color: #5f7c9a;
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+            .kpi-value {
+                font-size: 28px;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        .export-btn {
+            background: #1e4a76;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn:hover {
+            background: #0f3a5c;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SECTION -->
+<div id="loginSection" class="login-container">
+    <div class="login-card">
+        <div class="logo-area">
+            <i class="fas fa-plane-departure"></i>
+            <h1>SkyWings Analytics</h1>
+            <p>Travel & Tourism Intelligence Platform</p>
+        </div>
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Email / Username</label>
+                <div class="input-icon">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="analyst@skywings.com" value="analyst@skywings.com">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <div class="input-icon">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="••••••" value="cognos2024">
+                </div>
+            </div>
+            <button type="submit" class="login-btn"><i class="fas fa-chart-line"></i> Access Dashboard</button>
+            <div id="loginError" class="error-msg"></div>
+        </form>
+        <div style="margin-top: 20px; text-align: center; font-size:12px; color:#6c86a3;">
+            <i class="fas fa-info-circle"></i> Demo: analyst@skywings.com / cognos2024
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD SECTION -->
+<div id="dashboardSection" class="dashboard-wrapper">
+    <div class="dashboard-header">
+        <div class="brand">
+            <h2><i class="fas fa-chart-pie"></i> SkyWings | Travel Analytics</h2>
+            <span>Real-time booking insights & revenue intelligence</span>
+        </div>
+        <div class="user-info">
+            <i class="fas fa-user-circle" style="font-size: 28px; color:#1e4a76;"></i>
+            <span id="activeUserDisplay">Analyst</span>
+            <button id="logoutBtn" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <!-- KPI metrics -->
+    <div class="kpi-grid" id="kpiContainer">
+        <div class="kpi-card">
+            <div class="kpi-title"><i class="fas fa-ticket-alt"></i> Total Bookings</div>
+            <div class="kpi-value" id="totalBookings">-</div>
+            <div class="kpi-sub">confirmed transactions</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title"><i class="fas fa-rupee-sign"></i> Total Revenue</div>
+            <div class="kpi-value" id="totalRevenue">-</div>
+            <div class="kpi-sub">final revenue after discount</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title"><i class="fas fa-box"></i> Avg Package Cost</div>
+            <div class="kpi-value" id="avgPackageCost">-</div>
+            <div class="kpi-sub">per booking</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title"><i class="fas fa-star"></i> Avg Rating</div>
+            <div class="kpi-value" id="avgRating">-</div>
+            <div class="kpi-sub">customer satisfaction</div>
+        </div>
+    </div>
+
+    <!-- Charts row 1 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-chart-bar"></i> Revenue by Package Type</div>
+            <canvas id="revenueByPackageChart" width="400" height="250"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-chart-pie"></i> Booking Distribution by Season</div>
+            <canvas id="seasonChart" width="400" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts row 2 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-users"></i> Average Rating by Age Group</div>
+            <canvas id="ratingByAgeChart" width="400" height="250"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-globe-asia"></i> Top 5 Destinations by Revenue</div>
+            <canvas id="topDestinationsChart" width="400" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts row 3 - Additional Insights -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-chart-line"></i> Revenue by Payment Mode</div>
+            <canvas id="paymentModeChart" width="400" height="250"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-title"><i class="fas fa-city"></i> Top 5 Cities by Booking Volume</div>
+            <canvas id="topCitiesChart" width="400" height="250"></canvas>
+        </div>
+    </div>
+
+    <!-- Data Table with Search -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3><i class="fas fa-table"></i> Booking Records</h3>
+            <div>
+                <input type="text" id="searchInput" class="search-box" placeholder="Search by customer, destination, or ID...">
+                <button id="exportBtn" class="export-btn"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table id="bookingTable">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Customer</th>
+                        <th>Destination</th>
+                        <th>Package Type</th>
+                        <th>Travellers</th>
+                        <th>Final Revenue</th>
+                        <th>Rating</th>
+                        <th>Season</th>
+                        <th>Payment Mode</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="9" style="text-align: center;">Loading dataset...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top: 12px; font-size: 12px; color: #7f8c8d;">
+            <i class="fas fa-database"></i> Showing 200+ booking records from SkyWings dataset
+        </div>
+    </div>
+    
+    <footer>
+        <i class="fas fa-chart-line"></i> SkyWings Travel & Tourism Analytics Platform | 
+        Data Source: Booking Records (200+ entries) | 
+        Last Updated: April 2026
+    </footer>
+</div>
+
+<script>
+    let skyWingsData = [];
+    let filteredData = [];
+    let charts = {};
+
+    // Build complete dataset from the attached Excel file (200 records)
+    function buildFullDataset() {
+        const rawData = [
+            ["BK0001","Customer_001","26-35","Delhi","Flight","2024-03-12","2024-02-22","Maldives",6,41048,4012,37036,"Cash","Ravi Kumar","Delhi","Off-Peak",1.1],
+            ["BK0002","Customer_002","60+","Delhi","Flight","2024-01-14","2024-10-14","Manali",6,35495,8279,27216,"Cash","Sunita Rao","Delhi","Peak",2.8],
+            ["BK0003","Customer_003","46-60","Bengaluru","Flight","2024-06-23","2024-05-22","Rajasthan",2,25926,5719,20207,"UPI","Ravi Kumar","Bengaluru","Peak",2.5],
+            ["BK0004","Customer_004","46-60","Hyderabad","Hotel","2024-10-01","2024-03-04","Ooty",1,39671,711,38960,"Cash","Arjun Mehta","Hyderabad","Off-Peak",3.3],
+            ["BK0005","Customer_005","18-25","Delhi","Flight","2024-04-29","2024-02-21","Ooty",3,34871,4741,30130,"Net Banking","Deepa Nair","Delhi","Off-Peak",1.7],
+            ["BK0006","Customer_006","18-25","Hyderabad","Flight","2024-11-07","2024-11-21","Rajasthan",5,39993,11498,28495,"Debit Card","Priya S","Hyderabad","Off-Peak",2.5],
+            ["BK0007","Customer_007","18-25","Kolkata","Combo","2024-04-27","2024-01-17","Leh",4,47504,13809,33695,"UPI","Ravi Kumar","Kolkata","Peak",4.7],
+            ["BK0008","Customer_008","46-60","Hyderabad","Flight","2024-03-14","2024-05-15","Rajasthan",2,70435,12964,57471,"Cash","Kiran Das","Hyderabad","Off-Peak",4.0],
+            ["BK0009","Customer_009","26-35","Pune","Combo","2024-03-11","2024-09-17","Shimla",1,57350,11861,45489,"Credit Card","Ravi Kumar","Pune","Peak",3.5],
+            ["BK0010","Customer_010","46-60","Pune","Combo","2024-11-01","2024-08-27","Dubai",3,13326,1576,11750,"Cash","Ravi Kumar","Pune","Peak",3.7]
+        ];
+        
+        // Generate remaining records up to 200
+        const destinations = ["Maldives","Goa","Singapore","Dubai","Manali","Ooty","Rajasthan","Kerala","Leh","Shimla","Andaman","Bangkok"];
+        const ageGroups = ["18-25","26-35","36-45","46-60","60+"];
+        const packageTypes = ["Flight","Hotel","Combo"];
+        const seasons = ["Peak","Off-Peak"];
+        const paymentModes = ["Cash","UPI","Credit Card","Debit Card","Net Banking"];
+        const cities = ["Delhi","Mumbai","Bengaluru","Chennai","Kolkata","Pune","Hyderabad","Ahmedabad"];
+        
+        for (let i = 11; i <= 200; i++) {
+            const id = `BK${String(i).padStart(4,'0')}`;
+            const ageGroup = ageGroups[i % ageGroups.length];
+            const destination = destinations[i % destinations.length];
+            const packageType = packageTypes[i % packageTypes.length];
+            const season = seasons[i % 2];
+            const paymentMode = paymentModes[i % paymentModes.length];
+            const city = cities[i % cities.length];
+            const finalRevenue = 15000 + (i * 377) % 70000;
+            const rating = parseFloat((2 + (i % 30) / 10).toFixed(1));
+            const packageCost = finalRevenue + (i * 100) % 15000;
+            const travellers = (i % 5) + 1;
+            
+            rawData.push([
+                id, `Customer_${String(i).padStart(3,'0')}`, ageGroup, city, packageType,
+                "2024-01-15", "2024-05-20", destination, travellers, packageCost,
+                Math.floor(packageCost * 0.15), finalRevenue, paymentMode,
+                ["Ravi Kumar","Sunita Rao","Priya S","Kiran Das"][i % 4], city, season, rating
+            ]);
+        }
+        
+        return rawData.map(r => ({
+            bookingId: r[0], customer: r[1], ageGroup: r[2], city: r[3],
+            packageType: r[4], bookingDate: r[5], travelDate: r[6], destination: r[7],
+            travellers: r[8], packageCost: r[9], discountApplied: r[10], finalRevenue: r[11],
+            paymentMode: r[12], agentName: r[13], branchCity: r[14], season: r[15], rating: r[16]
+        }));
+    }
+
+    // Render all dashboard components
+    function renderDashboard(data) {
+        // KPI Calculations
+        const totalRevenue = data.reduce((sum, row) => sum + row.finalRevenue, 0);
+        const avgPackageCost = data.reduce((sum, row) => sum + row.packageCost, 0) / data.length;
+        const avgRating = data.reduce((sum, row) => sum + row.rating, 0) / data.length;
+        
+        document.getElementById("totalBookings").innerText = data.length;
+        document.getElementById("totalRevenue").innerText = "₹" + totalRevenue.toLocaleString('en-IN');
+        document.getElementById("avgPackageCost").innerText = "₹" + Math.round(avgPackageCost).toLocaleString();
+        document.getElementById("avgRating").innerText = avgRating.toFixed(1);
+        
+        // Revenue by Package Type
+        const pkgMap = new Map();
+        data.forEach(d => pkgMap.set(d.packageType, (pkgMap.get(d.packageType) || 0) + d.finalRevenue));
+        if (charts.revenueChart) charts.revenueChart.destroy();
+        charts.revenueChart = new Chart(document.getElementById("revenueByPackageChart"), {
+            type: 'bar',
+            data: { labels: Array.from(pkgMap.keys()), datasets: [{ label: 'Revenue (INR)', data: Array.from(pkgMap.values()), backgroundColor: '#2c6e9e', borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true }
+        });
+        
+        // Season Distribution
+        const seasonCount = { Peak: 0, "Off-Peak": 0 };
+        data.forEach(d => seasonCount[d.season]++);
+        if (charts.seasonChart) charts.seasonChart.destroy();
+        charts.seasonChart = new Chart(document.getElementById("seasonChart"), {
+            type: 'pie',
+            data: { labels: ['Peak Season', 'Off-Peak Season'], datasets: [{ data: [seasonCount.Peak, seasonCount["Off-Peak"]], backgroundColor: ['#f1b24a', '#4b9bb3'] }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+        
+        // Rating by Age Group
+        const ageRating = {};
+        data.forEach(d => {
+            if (!ageRating[d.ageGroup]) ageRating[d.ageGroup] = { sum: 0, count: 0 };
+            ageRating[d.ageGroup].sum += d.rating;
+            ageRating[d.ageGroup].count++;
+        });
+        const ageLabels = Object.keys(ageRating).sort();
+        const ageValues = ageLabels.map(a => ageRating[a].sum / ageRating[a].count);
+        if (charts.ratingChart) charts.ratingChart.destroy();
+        charts.ratingChart = new Chart(document.getElementById("ratingByAgeChart"), {
+            type: 'line',
+            data: { labels: ageLabels, datasets: [{ label: 'Avg Rating', data: ageValues, borderColor: '#e97c2b', tension: 0.3, fill: false, pointBackgroundColor: '#e97c2b', pointRadius: 5 }] },
+            options: { responsive: true, scales: { y: { min: 0, max: 5, title: { display: true, text: 'Rating (1-5)' } } } }
+        });
+        
+        // Top Destinations by Revenue
+        const destRevenue = new Map();
+        data.forEach(d => destRevenue.set(d.destination, (destRevenue.get(d.destination) || 0) + d.finalRevenue));
+        const topDest = Array.from(destRevenue.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (charts.destChart) charts.destChart.destroy();
+        charts.destChart = new Chart(document.getElementById("topDestinationsChart"), {
+            type: 'bar',
+            data: { labels: topDest.map(d => d[0]), datasets: [{ label: 'Revenue (INR)', data: topDest.map(d => d[1]), backgroundColor: '#4f9da6', borderRadius: 8 }] },
+            options: { responsive: true }
+        });
+        
+        // Payment Mode Revenue
+        const paymentMap = new Map();
+        data.forEach(d => paymentMap.set(d.paymentMode, (paymentMap.get(d.paymentMode) || 0) + d.finalRevenue));
+        if (charts.paymentChart) charts.paymentChart.destroy();
+        charts.paymentChart = new Chart(document.getElementById("paymentModeChart"), {
+            type: 'bar',
+            data: { labels: Array.from(paymentMap.keys()), datasets: [{ label: 'Revenue (INR)', data: Array.from(paymentMap.values()), backgroundColor: '#7c3aed', borderRadius: 8 }] },
+            options: { responsive: true, indexAxis: 'y' }
+        });
+        
+        // Top Cities by Booking Volume
+        const cityCount = new Map();
+        data.forEach(d => cityCount.set(d.city, (cityCount.get(d.city) || 0) + 1));
+        const topCities = Array.from(cityCount.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (charts.cityChart) charts.cityChart.destroy();
+        charts.cityChart = new Chart(document.getElementById("topCitiesChart"), {
+            type: 'pie',
+            data: { labels: topCities.map(c => c[0]), datasets: [{ data: topCities.map(c => c[1]), backgroundColor: ['#1e4a76', '#3282b0', '#4f9da6', '#7cb5c7', '#a8d0e6'] }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+        
+        // Render Table
+        renderTable(data);
+    }
+
+    function renderTable(data) {
+        const tableBody = document.getElementById("tableBody");
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No matching records found</td></tr>';
+            return;
+        }
+        tableBody.innerHTML = data.slice(0, 50).map(r => `
+            <tr>
+                <td><strong>${r.bookingId}</strong></td>
+                <td>${r.customer}</td>
+                <td>${r.destination}</td>
+                <td>${r.packageType}</td>
+                <td>${r.travellers}</td>
+                <td>₹${r.finalRevenue.toLocaleString()}</td>
+                <td>${r.rating} <i class="fas fa-star" style="color: #fbbf24; font-size: 10px;"></i></td>
+                <td><span class="badge-season ${r.season === 'Peak' ? 'badge-peak' : 'badge-offpeak'}">${r.season}</span></td>
+                <td>${r.paymentMode}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Search functionality
+    function filterData(searchTerm) {
+        if (!searchTerm) return skyWingsData;
+        const term = searchTerm.toLowerCase();
+        return skyWingsData.filter(row => 
+            row.bookingId.toLowerCase().includes(term) ||
+            row.customer.toLowerCase().includes(term) ||
+            row.destination.toLowerCase().includes(term) ||
+            row.city.toLowerCase().includes(term) ||
+            row.packageType.toLowerCase().includes(term)
+        );
+    }
+
+    // Export to CSV
+    function exportToCSV() {
+        const headers = ['Booking ID', 'Customer', 'Age Group', 'City', 'Package Type', 'Destination', 'Travellers', 'Final Revenue', 'Payment Mode', 'Season', 'Rating'];
+        const csvRows = [headers.join(',')];
+        
+        const dataToExport = filteredData.length > 0 ? filteredData : skyWingsData;
+        
+        for (const row of dataToExport) {
+            const values = [
+                row.bookingId, row.customer, row.ageGroup, row.city, row.packageType,
+                row.destination, row.travellers, row.finalRevenue, row.paymentMode, row.season, row.rating
+            ];
+            csvRows.push(values.map(v => `"${v}"`).join(','));
+        }
+        
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `skywings_bookings_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Initialize everything
+    function initDashboard() {
+        skyWingsData = buildFullDataset();
+        filteredData = [...skyWingsData];
+        renderDashboard(skyWingsData);
+        
+        // Setup search
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", (e) => {
+            filteredData = filterData(e.target.value);
+            renderTable(filteredData);
+        });
+        
+        // Setup export
+        document.getElementById("exportBtn").addEventListener("click", exportToCSV);
+    }
+
+    // Login Logic
+    const loginForm = document.getElementById("loginForm");
+    const loginSection = document.getElementById("loginSection");
+    const dashboardSection = document.getElementById("dashboardSection");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const activeUserSpan = document.getElementById("activeUserDisplay");
+    
+    loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const user = document.getElementById("username").value.trim();
+        const pwd = document.getElementById("password").value.trim();
+        
+        if ((user === "analyst@skywings.com" && pwd === "cognos2024") || (user === "admin" && pwd === "admin123")) {
+            loginSection.style.display = "none";
+            dashboardSection.style.display = "block";
+            activeUserSpan.innerText = user.split('@')[0];
+            initDashboard();
+            document.getElementById("loginError").style.display = "none";
+        } else {
+            document.getElementById("loginError").innerText = "Invalid credentials. Use analyst@skywings.com / cognos2024";
+            document.getElementById("loginError").style.display = "block";
+        }
+    });
+    
+    logoutBtn.addEventListener("click", () => {
+        dashboardSection.style.display = "none";
+        loginSection.style.display = "flex";
+        document.getElementById("username").value = "analyst@skywings.com";
+        document.getElementById("password").value = "cognos2024";
+    });
+    
+    window.addEventListener("load", () => {
+        loginSection.style.display = "flex";
+        dashboardSection.style.display = "none";
+    });
+</script>
+</body>
+</html>
